@@ -28,16 +28,13 @@ class Takeoff(object):
         # Goal
         self.target_pos = target_pos if target_pos is not None else np.array([0., 0., 10.])
 
-    def get_reward(self):
+    def get_reward(self, done):
         """
         Uses current pose of sim to return reward. 计算奖励值。
         """
-        distance_vec = self.sim.pose[:3] - self.target_pos
-        if self.sim.pose[2] < self.target_pos[2]:
-            reward = -min(abs(np.linalg.norm(distance_vec)), 20.0)/20.0
-        else:
-            reward = min(abs(np.linalg.norm(distance_vec)), 20.0)/20.0
-        # reward = 1. - .3 * (abs(self.sim.pose[:3] - self.target_pos)).sum()
+        reward = self.sim.v[2] / 10.0  # 向上的速度
+        reward += (self.sim.pose[2] - self.target_pos[2]) / 10.0  # 距离target的z轴距离
+        reward -= np.linalg.norm(self.sim.pose[:2]) / 10.0  # x,y方向不跑偏
         return reward
 
     def step(self, rotor_speeds):
@@ -46,10 +43,11 @@ class Takeoff(object):
         pose_all = []
         for _ in range(self.action_repeat):
             done = self.sim.next_timestep(rotor_speeds)  # update the sim pose and velocities
-            reward += self.get_reward()
+            reward += self.get_reward(done)
             pose_all.append(self.sim.pose)
             # 判断是否到达目标位置
             if self.sim.pose[2] >= self.target_pos[2]:
+                reward += 5
                 done = True
 
         next_state = np.concatenate(pose_all)
