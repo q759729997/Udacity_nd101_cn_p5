@@ -34,9 +34,11 @@ class Actor:
         """Build an actor (policy) network that maps states -> actions."""
         # Define input layer (states)
         states = layers.Input(shape=(self.state_size,), name='states')
+        # 对状态进行规范化
+        states_normal = layers.BatchNormalization()(states)
 
         # Add hidden layers
-        net = layers.Dense(units=32, activation='relu')(states)
+        net = layers.Dense(units=32, activation='relu')(states_normal)
         net = layers.Dropout(0.1)(net)
         net = layers.Dense(units=64, activation='relu')(net)
         net = layers.Dropout(0.1)(net)

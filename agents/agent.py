@@ -10,7 +10,7 @@ class DDPG(object):
     Reinforcement Learning agent that learns using DDPG.深度确定性策略梯度 (DDPG)
     """
 
-    def __init__(self, task):
+    def __init__(self, task, buffer_size=100000, batch_size=64, gamma=0.99, tau=0.01):
         self.task = task
         self.state_size = task.state_size
         self.action_size = task.action_size
@@ -35,13 +35,13 @@ class DDPG(object):
         self.noise = OUNoise(size=self.action_size)
 
         # Replay memory
-        self.buffer_size = 100000
-        self.batch_size = 32  # 64
+        self.buffer_size = buffer_size
+        self.batch_size = batch_size  # 64
         self.memory = ReplayBuffer(self.buffer_size, self.batch_size)
 
         # Algorithm parameters
-        self.gamma = 0.9  # 0.99 discount factor
-        self.tau = 0.005  # 0.01 for soft update of target parameters
+        self.gamma = gamma  # 0.99 discount factor
+        self.tau = tau  # 0.01 for soft update of target parameters
 
         # 初始化
         self.last_state = None
